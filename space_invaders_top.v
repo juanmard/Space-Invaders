@@ -10,9 +10,9 @@ module space_invaders_top(
 	   input wire  start,		  
 	   output wire hsync, //horizontal sync out
 	   output wire vsync, //vertical sync out
-	   output wire red, //red vga output
+	   output wire red,   //red vga output
 	   output wire green, //green vga output
-	   output wire blue //blue vga output 	       
+	   output wire blue   //blue vga output 	       
 	   );   
    
    wire 	       clk_36MHz;
@@ -30,6 +30,8 @@ module space_invaders_top(
    wire [7:0] 	       score;
    wire [1:0] 	       gameplay;
    
+
+/*
    clk_36MHz_generator clk_36MHz_generator1(
 			.clk_12MHz(clk_12MHz),
 			.clk_36MHz(clk_36MHz)
@@ -46,7 +48,37 @@ module space_invaders_top(
 	    .x(x),
 	    .y(y)
 	    );
-   
+*/
+
+// For a 640x480@72Hz VGA controller.
+vga_sync vga_sync1(
+            .clk(clk_12MHz),           // Input clock: 12MHz
+            .hsync(hsync),             // Horizontal sync out
+            .vsync(vsync),             // Vertical sync out
+            .x_px(x),          // X position for actual pixel.
+            .y_px(y),          // Y position for actual pixel.
+            .activevideo(activevideo),
+            .px_clk(clk_36MHz)
+         );
+
+wire activevideo;
+
+always @(posedge clk_36MHz)
+begin
+    if (activevideo)
+        begin
+        red   <= rgb[2];
+        green <= rgb[1];
+        blue  <= rgb[0];
+        end
+    else
+        begin
+        red   <= 0;
+        green <= 0;
+        blue  <= 0;
+        end
+end
+
    sprite_drawer sprite_drawer1(
 				.x(x),
 				.y(y),
